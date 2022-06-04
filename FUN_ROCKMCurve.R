@@ -1,11 +1,29 @@
-# https://www.bioinfo-scrounger.com/archives/Time-dependent-ROC/
+## Ref:https://www.bioinfo-scrounger.com/archives/Time-dependent-ROC/
 
-rm(list = ls()) # Clean variable
+##### Presetting ######
+  rm(list = ls()) # Clean variable
+  memory.limit(150000)
 
+
+##### Load Packages #####
+  #### Basic installation ####
+  Package.set <- c("tidyverse","timeROC","survival","survivalROC")
+  ## Check whether the installation of those packages is required from basic
+  for (i in 1:length(Package.set)) {
+    if (!requireNamespace(Package.set[i], quietly = TRUE)){
+      install.packages(Package.set[i])
+    }
+  }
+  ## Load Packages
+  lapply(Package.set, library, character.only = TRUE)
+  rm(Package.set,i)
+
+
+##### Load datasets  #####
 library(timeROC)
 library(survival)
-
 library(survivalROC)
+
 data(mayo)
 
 time_roc_res <- timeROC(
@@ -22,9 +40,9 @@ time_roc_res <- timeROC(
 time_roc_res$AUC
 confint(time_roc_res, level = 0.95)$CI_AUC
 
-plot(time_roc_res, time=3 * 365, col = "red", title = FALSE)  
-plot(time_roc_res, time=5 * 365, add=TRUE, col="blue") 
-plot(time_roc_res, time=10 * 365, add=TRUE, col="green") 
+plot(time_roc_res, time=3 * 365, col = "red", title = FALSE)
+plot(time_roc_res, time=5 * 365, add=TRUE, col="blue")
+plot(time_roc_res, time=10 * 365, add=TRUE, col="green")
 legend("bottomright",c("3 Years" ,"5 Years", "10 Years"),
        col=c("red", "blue", "green"), lty=1, lwd=2)
 
