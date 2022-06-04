@@ -5,6 +5,17 @@
   rm(list = ls()) # Clean variable
   memory.limit(150000)
 
+##### Current path and new folder setting* #####
+  ProjectName = "Example"
+  Sampletype = "mayo"
+  #ProjSamp.Path = paste0(Sampletype,"_",ProjectName)
+
+  Version = paste0(Sys.Date(),"_",ProjectName,"_",Sampletype)
+  Save.Path = paste0(getwd(),"/",Version)
+  ## Create new folder
+  if (!dir.exists(Save.Path)){
+    dir.create(Save.Path)
+  }
 
 ##### Load Packages #####
   #### Basic installation ####
@@ -82,8 +93,17 @@ data(mayo)
       axis.text = element_text(face = "bold", size = 11, color = "black"),
       axis.title.x = element_text(face = "bold", size = 14, color = "black", margin = margin(c(15, 0, 0, 0))),
       axis.title.y = element_text(face = "bold", size = 14, color = "black", margin = margin(c(0, 15, 0, 0)))
-    )
+    ) -> P.ROC
 
+  P.ROC
+
+  pdf(file = paste0(Save.Path,"/",ProjectName,"_ROC.pdf"),
+      width = 7,  height = 7
+  )
+
+    P.ROC
+
+  dev.off()
 
 ## Compare two time-dependent AUC
   time_roc_res2 <- timeROC(
@@ -103,7 +123,30 @@ data(mayo)
   plotAUCcurve(time_roc_res, conf.int=TRUE, col="red")
   plotAUCcurve(time_roc_res2, conf.int=TRUE, col="blue", add=TRUE)
   legend("bottomright",c("mayoscore5", "mayoscore4"), col = c("red","blue"), lty=1, lwd=2)
+  dev.off()
 
+
+  pdf(file = paste0(Save.Path,"/",ProjectName,"_AUC.pdf"),
+      width = 7,  height = 7
+  )
+
+    plotAUCcurve(time_roc_res, conf.int=TRUE, col="red")
+    plotAUCcurve(time_roc_res2, conf.int=TRUE, col="blue", add=TRUE)
+    legend("bottomright",c("mayoscore5", "mayoscore4"), col = c("red","blue"), lty=1, lwd=2)
+  dev.off()
+
+  result.confint <- confint(object = time_roc_res, level = 0.95,
+                            n.sim = 3000)
+
+  pdf(file = paste0(Save.Path,"/",ProjectName,"_ROC_AUC.pdf"),
+      width = 7,  height = 7
+  )
+    P.ROC
+
+    plotAUCcurve(time_roc_res, conf.int=TRUE, col="red")
+    plotAUCcurve(time_roc_res2, conf.int=TRUE, col="blue", add=TRUE)
+    legend("bottomright",c("mayoscore5", "mayoscore4"), col = c("red","blue"), lty=1, lwd=2)
+  dev.off()
 
 ## Optimal threshold for ROC（cutoff）
   mayo$mayoscore5[which.max(time_ROC_df$TP_3year - time_ROC_df$FP_3year)]
