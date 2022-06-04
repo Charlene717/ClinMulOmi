@@ -38,14 +38,18 @@
 
 data(mayo)
 
+##### Parameter setting* #####
+timesseq.set <- seq(from=1, to=10, by=2)
+
+
 ##### timeROC  #####
   time_roc_res <- timeROC(
     T = mayo$time,
     delta = mayo$censor,
-    marker = mayo$mayoscore5,
+    marker = mayo[,3],
     cause = 1,
     weighting="marginal",
-    times = c(3 * 365, 5 * 365, 10 * 365),
+    times = timesseq.set*365,
     ROC = TRUE,
     iid = TRUE
   )
@@ -53,11 +57,27 @@ data(mayo)
   time_roc_res$AUC
   confint(time_roc_res, level = 0.95)$CI_AUC
 
-  plot(time_roc_res, time=3 * 365, col = "red", title = FALSE)
-  plot(time_roc_res, time=5 * 365, add=TRUE, col="blue")
-  plot(time_roc_res, time=10 * 365, add=TRUE, col="green")
-  legend("bottomright",c("3 Years" ,"5 Years", "10 Years"),
-         col=c("red", "blue", "green"), lty=1, lwd=2)
+## Plot
+  ## Color ## Ref: https://www.jianshu.com/p/21971df8e2e4
+  # library(wesanderson)
+  # names(wes_palettes)
+
+  ## Color ## Ref: https://bookdown.org/wangminjie/R4DS/tidyverse-ggplot2-colors.html
+  library(colorspace)
+
+
+  for (i in 1:length(timesseq.set)) {
+    if(i==1){
+      plot(time_roc_res, time=timesseq.set[i]* 365, col = rainbow(length(timesseq.set))[i], title = FALSE)
+    }else{
+      plot(time_roc_res, time=timesseq.set[i] * 365, add=TRUE, col=rainbow(length(timesseq.set))[i])
+    }
+
+  }
+  legend("bottomright",paste0(timesseq.set," Years"),
+         col=rainbow(length(timesseq.set)), lty=1, lwd=2)
+  rm(i)
+
 
 ##### Beautify Figures #####
   time_ROC_df <- data.frame(
@@ -69,41 +89,81 @@ data(mayo)
     FP_10year = time_roc_res$FP[, 3]
   )
 
-  library(ggplot2)
-  ggplot(data = time_ROC_df) +
-    geom_line(aes(x = FP_3year, y = TP_3year), size = 1, color = "#BC3C29FF") +
-    geom_line(aes(x = FP_5year, y = TP_5year), size = 1, color = "#0072B5FF") +
-    geom_line(aes(x = FP_10year, y = TP_10year), size = 1, color = "#E18727FF") +
-    geom_abline(slope = 1, intercept = 0, color = "grey", size = 1, linetype = 2) +
-    theme_bw() +
-    annotate("text",
-             x = 0.75, y = 0.25, size = 4.5,
-             label = paste0("AUC at 3 years = ", sprintf("%.3f", time_roc_res$AUC[[1]])), color = "#BC3C29FF"
-    ) +
-    annotate("text",
-             x = 0.75, y = 0.15, size = 4.5,
-             label = paste0("AUC at 5 years = ", sprintf("%.3f", time_roc_res$AUC[[2]])), color = "#0072B5FF"
-    ) +
-    annotate("text",
-             x = 0.75, y = 0.05, size = 4.5,
-             label = paste0("AUC at 10 years = ", sprintf("%.3f", time_roc_res$AUC[[3]])), color = "#E18727FF"
-    ) +
-    labs(x = "False positive rate", y = "True positive rate") +
-    theme(
-      axis.text = element_text(face = "bold", size = 11, color = "black"),
-      axis.title.x = element_text(face = "bold", size = 14, color = "black", margin = margin(c(15, 0, 0, 0))),
-      axis.title.y = element_text(face = "bold", size = 14, color = "black", margin = margin(c(0, 15, 0, 0)))
-    ) -> P.ROC
+  for (i in 1:length(timesseq.set)) {
+    if(i==1){
+      time_ROC_df <- data.frame( time_roc_res$TP[, i], time_roc_res$FP[, i])
+      colnames(time_ROC_df) <- c(paste0("TP_",timesseq.set[i],"years"),paste0("FP_",timesseq.set[i],"years"))
 
-  P.ROC
+    }else{
+      time_ROC_df_Temp <- data.frame( time_roc_res$TP[, i], time_roc_res$FP[, i])
+      colnames(time_ROC_df_Temp) <- c(paste0("TP_",timesseq.set[i],"years"),paste0("FP_",timesseq.set[i],"years"))
+      time_ROC_df <- cbind(time_ROC_df,time_ROC_df_Temp)
+    }
+
+  }
+  rm(i,time_ROC_df_Temp)
+
+  library(ggplot2)
+  ## Using-geom-line-in-a-for-loop
+  ## Ref: https://stackoverflow.com/questions/27852620/using-geom-line-in-a-for-loop
+  # p <-  ggplot(data = time_ROC_df)
+  #  for (i in  seq(from=1, to=length(timesseq.set)*2, by=2)) {
+  #    p <- p + geom_line(aes_string(x = time_ROC_df[,i+1], y = time_ROC_df[,i]), size = 1, color = qualitative_hcl(length(timesseq.set))[which(timesseq.set==i)])+
+  #             annotate("text", x = 0.75, y = 0.55 -which(timesseq.set==i)*0.1, size = 4.5,
+  #             label = paste0("AUC at ",timesseq.set[which(timesseq.set==i)]," years = ", sprintf("%.3f", time_roc_res$AUC[[which(timesseq.set==i)]])), color = qualitative_hcl(length(timesseq.set))[which(timesseq.set==i)]
+  #      )
+  #
+  #  }
+  # print(p)
+
+  P.ROC <-  ggplot(data = time_ROC_df)
+  for (i in  1:length(timesseq.set)) {
+    P.ROC <- P.ROC + geom_line(aes_string(x = time_ROC_df[,timesseq.set[i]+1], y = time_ROC_df[,timesseq.set[i]]), size = 1.5, color = qualitative_hcl(length(timesseq.set))[i])+
+      annotate("text", x = 0.75, y = 0.55 -i*0.05, size = 7,
+               label = paste0("AUC at ",timesseq.set[i]," years = ", sprintf("%.3f", time_roc_res$AUC[[i]])), color = qualitative_hcl(length(timesseq.set))[i]
+      )
+
+  }
+  print(P.ROC)
+
+  P.ROC2 <- P.ROC + geom_abline(slope = 1, intercept = 0, color = "grey", size = 1, linetype = 2)+
+            theme_classic() + # White background
+            labs(x = "False positive rate", y = "True positive rate")+
+    theme(axis.line = element_line(colour = "black",
+                                   size = 0, linetype = "solid")) + # Change the line type and color of axis lines
+    theme(axis.text.x = element_text(face="bold", color="black",
+                                     size=17, angle=0),
+          axis.text.y = element_text(face="bold", color="black",
+                                     size=17, angle=0)) +  # Change the appearance and the orientation angle
+    ggtitle("ROC Curve")+ # Change the main title and axis labels
+
+     theme(
+      plot.title = element_text(color="black", size=20, face="bold", hjust = 0.5),
+      axis.title.x = element_text(color="black", size=20, face="bold"),
+      axis.title.y = element_text(color="black", size=20, face="bold"), # Change the color, the size and the face of  the main title, x and y axis labels
+      aspect.ratio=1)+
+    theme(panel.background = element_rect(fill = "white", colour = "black",  size = 2.5))
+
+  P.ROC2
+
+  plotAUCcurve(time_roc_res, conf.int=TRUE, col="red")
+  legend("bottomright",colnames(mayo)[3], col = c("red"), lty=1, lwd=2)
+
 
   pdf(file = paste0(Save.Path,"/",ProjectName,"_ROC.pdf"),
       width = 7,  height = 7
   )
 
-    P.ROC
+  P.ROC2
 
   dev.off()
+
+  ##### Optimal threshold for ROC（cutoff）#####
+  mayo[,3][which.max(time_ROC_df$TP_3year - time_ROC_df$FP_3year)]
+
+
+####################################################################################################
+
 
 ## Compare two time-dependent AUC
   time_roc_res2 <- timeROC(
@@ -112,7 +172,7 @@ data(mayo)
     marker = mayo$mayoscore4,
     cause = 1,
     weighting="marginal",
-    times = c(3 * 365, 5 * 365, 10 * 365),
+    times = timesseq.set*365,
     ROC = TRUE,
     iid = TRUE
   )
