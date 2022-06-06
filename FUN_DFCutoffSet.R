@@ -1,10 +1,7 @@
 #### Dataframe with cutoff setting ####
-## Set cutoff of N years survival
-cutoffKM <- ROCResultSeq_mayo5[["cutoff"]][["5_years"]]
-OSTimeSetting <- 5
-
 ## Test Function
-mayo3 <- DFCutoffSet(mayo, cutoffKM, OSTimeSetting,
+mayo3 <- DFCutoffSet(mayo, cutoffKM = ROCResultSeq_mayo5[["cutoff"]][["5_years"]],
+                     OSTimeSetting = 5,
                      Tar="mayoscore5", time = "time", censor="censor")
 
 DFCutoffSet <- function(mayo, cutoffKM, OSTimeSetting,
