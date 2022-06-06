@@ -147,11 +147,24 @@ TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor=
     dev.off()
 
   ##### Optimal threshold for ROC（cutoff）#####
-    cutoff <- mayo[,Tar][which.max(time_ROC_df$TP_3year - time_ROC_df$FP_3year)]
+    for (i in 1:length(timesseq.set)) {
+      if(i==1){
+        cutoff.df <- as.data.frame(mayo[,Tar][which.max(time_ROC_df[,timesseq.set[i]] - time_ROC_df[,timesseq.set[i]+1])])
+        colnames(cutoff.df) <- paste0(timesseq.set[i],"_years")
+
+      }else{
+        cutoff_Temp.df <- as.data.frame(mayo[,Tar][which.max(time_ROC_df[,timesseq.set[i]] - time_ROC_df[,timesseq.set[i]+1])])
+        colnames(cutoff_Temp.df) <- paste0(timesseq.set[i],"_years")
+        cutoff.df <- cbind(cutoff.df,cutoff_Temp.df)
+      }
+
+    }
+    rm(i,cutoff_Temp.df)
+    rownames(cutoff.df) <- "Cutoff"
 
     Output <- list(time_roc_res = time_roc_res,
                    time_ROC_df = time_ROC_df,
-                   cutoff = cutoff)
+                   cutoff = cutoff.df)
 
   return(Output)
 }
