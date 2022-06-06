@@ -97,6 +97,43 @@
   library(survival)
   library(survminer)
 
+  ## Dataframe with cutoff setting
+  mayo <- DFCutoffSet(mayo, cutoffKM = ROCResultSeq_mayo5[["cutoff"]][["5_years"]],
+                       OSTimeSetting = 5,
+                       Tar="mayoscore5", time = "time", censor="censor")
+
+  ## KM plot
+
+  # Draw survival curves without grouping
+  fit_all <- survfit(Surv(ReTime, Status) ~ 1, data = mayo)
+  ggsurvplot(fit_all)
+
+  # Draw survival curves with grouping
+  fit <- survfit(Surv(ReTime, Status) ~ ROCGrp, data = mayo)
+  # Basic plots
+  ggsurvplot(fit)
+  # Add p-value,
+  ggsurvplot(fit, pval = TRUE, pval.coord = c(100, 0.03))
+  # Add confidence interval
+  ggsurvplot(fit, pval = TRUE, pval.coord = c(100, 0.03),
+             conf.int = TRUE) # Add confidence interval
+  # Add number at risk table
+  ggsurvplot(fit, pval = TRUE, pval.coord = c(100, 0.03),
+             conf.int = TRUE, risk.table = TRUE)
+
+  ##
+  ggsurvplot(fit2,  size = 1,  # change line size
+             linetype = "strata", # change line type by groups
+             break.time.by = 250, # break time axis by 250
+             palette = c("#ef476f", "#0077b6"), # custom color palette
+             conf.int = TRUE, # Add confidence interval
+             pval = TRUE, # Add p-value,
+             pval.coord = c(100, 0.03), # Change p-value posistion
+             risk.table = TRUE, # Add risk table
+             risk.table.col = "strata" # Change risk table color by groups
+  )
+
+################################################################
 
 
   #### Plot KM curve ####
