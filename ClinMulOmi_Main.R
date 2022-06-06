@@ -148,7 +148,14 @@
              risk.table = TRUE, # Add risk table
              break.time.by = 250, # break time axis by 250
              risk.table.col = "strata" # Change risk table color by groups
+  ) -> P.KM
+
+  ## Export PDF
+  pdf(file = paste0(Save.Path,"/",ProjectName,"_KMCurve.pdf"),
+      width = 7,  height = 7
   )
+  P.KM %>% print()
+  dev.off()
 
 ################################################################
 
