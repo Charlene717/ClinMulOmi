@@ -2,6 +2,8 @@
 ## Ref: https://www.bioinfo-scrounger.com/archives/Time-dependent-ROC/
 ## Paper: https://bmcmedresmethodol.biomedcentral.com/articles/10.1186/s12874-017-0332-6
 
+## To-do list ##
+# - [] ggplot: Time-dependent AUC plot
 
 TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor="censor",
                        timeROC.lt = list(cause = 1, weighting="marginal", ROC = TRUE, iid = TRUE),
@@ -130,7 +132,7 @@ TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor=
 
     print(P.ROC2)
 
-  #### Basic AUC plot ####
+  #### Basic time-dependent AUC plot ####
     plotAUCcurve(time_roc_res, conf.int=TRUE, col="red")
     legend("bottomright",Tar, col = c("red"), lty=1, lwd=2)
 
@@ -146,6 +148,11 @@ TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor=
     )
     plotAUCcurve(time_roc_res2, conf.int=TRUE, col="blue")
     legend("bottomright",Tar, col = c("blue"), lty=1, lwd=2)
+
+    # ## (Pending) ## df for ggplot
+    # result.confint <- confint(object = time_roc_res, level = 0.95,
+    #                           n.sim = 3000)
+
   #### Export PDF ####
     ## Create new folder
     if (!dir.exists(save.path)){

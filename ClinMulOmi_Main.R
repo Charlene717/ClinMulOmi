@@ -2,6 +2,8 @@
 ## Ref: https://www.bioinfo-scrounger.com/archives/Time-dependent-ROC/
 ## Paper: https://bmcmedresmethodol.biomedcentral.com/articles/10.1186/s12874-017-0332-6
 
+#### To-do list ####
+# - [] ggplot: Time-dependent AUC plot
 
 ##### Presetting ######
   rm(list = ls()) # Clean variable
@@ -70,58 +72,21 @@
   legend("bottomright",c("mayoscore4", "mayoscore5"), col = c("red","blue"), lty=1, lwd=2)
   dev.off()
 
+  ## Export PDF
+  pdf(file = paste0(Save.Path,"/",ProjectName,"_CompareAUC.pdf"),
+      width = 7,  height = 7
+  )
+    plotAUCcurve(ROCResultSeq_mayo4[["time_roc_res"]], conf.int=TRUE, col="red")
+    plotAUCcurve(ROCResultSeq_mayo5[["time_roc_res"]], conf.int=TRUE, col="blue", add=TRUE)
+    legend("bottomright",c("mayoscore4", "mayoscore5"), col = c("red","blue"), lty=1, lwd=2)
+  dev.off()
 
+  ## df for ggplot
+  result.confint <- confint(object = ROCResultSeq_mayo5[["time_roc_res"]], level = 0.95,
+                            n.sim = 3000)
 
 
 
 ####################################################################################################
-
-
-## Compare two time-dependent AUC
-time_roc_res2 <- timeROC(
-  T = mayo$time,
-  delta = mayo$censor,
-  marker = mayo$mayoscore4,
-  cause = 1,
-  weighting="marginal",
-  times = timesseq.set*365,
-  ROC = TRUE,
-  iid = TRUE
-)
-
-time_roc_res2$AUC
-compare(time_roc_res, time_roc_res2, adjusted = TRUE)$p_values_AUC
-
-plotAUCcurve(time_roc_res, conf.int=TRUE, col="red")
-plotAUCcurve(time_roc_res2, conf.int=TRUE, col="blue", add=TRUE)
-legend("bottomright",c("mayoscore5", "mayoscore4"), col = c("red","blue"), lty=1, lwd=2)
-dev.off()
-
-
-pdf(file = paste0(Save.Path,"/",ProjectName,"_AUC.pdf"),
-    width = 7,  height = 7
-)
-
-plotAUCcurve(time_roc_res, conf.int=TRUE, col="red")
-plotAUCcurve(time_roc_res2, conf.int=TRUE, col="blue", add=TRUE)
-legend("bottomright",c("mayoscore5", "mayoscore4"), col = c("red","blue"), lty=1, lwd=2)
-dev.off()
-
-result.confint <- confint(object = time_roc_res, level = 0.95,
-                          n.sim = 3000)
-
-pdf(file = paste0(Save.Path,"/",ProjectName,"_ROC_AUC.pdf"),
-    width = 7,  height = 7
-)
-P.ROC
-
-plotAUCcurve(time_roc_res, conf.int=TRUE, col="red")
-plotAUCcurve(time_roc_res2, conf.int=TRUE, col="blue", add=TRUE)
-legend("bottomright",c("mayoscore5", "mayoscore4"), col = c("red","blue"), lty=1, lwd=2)
-dev.off()
-
-## Optimal threshold for ROC（cutoff）
-mayo$mayoscore5[which.max(time_ROC_df$TP_3year - time_ROC_df$FP_3year)]
-
 
 
