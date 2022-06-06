@@ -17,36 +17,34 @@
     dir.create(Save.Path)
   }
 
-##### Load Packages #####
-  #### Basic installation ####
-  Package.set <- c("tidyverse","timeROC","survival","survivalROC")
-  ## Check whether the installation of those packages is required from basic
-  for (i in 1:length(Package.set)) {
-    if (!requireNamespace(Package.set[i], quietly = TRUE)){
-      install.packages(Package.set[i])
-    }
-  }
-  ## Load Packages
-  lapply(Package.set, library, character.only = TRUE)
-  rm(Package.set,i)
-
-
-##### Load datasets  #####
-  library(timeROC)
-  library(survival)
-  library(survivalROC)
-
-data(mayo)
-
 ##### Parameter setting* #####
-timesseq.set <- seq(from=1, to=10, by=2)
+  timesseq.set <- seq(from=1, to=10, by=2)
+
+  data(mayo)
+
+  ## Test fuction
+  ROCResult <- TimeDepROC(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor="censor")
+
+TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor="censor") {
+  ##### Load Packages #####
+    #### Basic installation ####
+    Package.set <- c("tidyverse","timeROC","survival","survivalROC")
+    ## Check whether the installation of those packages is required from basic
+    for (i in 1:length(Package.set)) {
+      if (!requireNamespace(Package.set[i], quietly = TRUE)){
+        install.packages(Package.set[i])
+      }
+    }
+    ## Load Packages
+    lapply(Package.set, library, character.only = TRUE)
+    rm(Package.set,i)
 
 
-##### timeROC  #####
+  ##### timeROC  #####
   time_roc_res <- timeROC(
-    T = mayo$time,
-    delta = mayo$censor,
-    marker = mayo[,3],
+    T = mayo[,time],
+    delta = mayo[,censor],
+    marker = mayo[,Tar],
     cause = 1,
     weighting="marginal",
     times = timesseq.set*365,
@@ -57,7 +55,7 @@ timesseq.set <- seq(from=1, to=10, by=2)
   time_roc_res$AUC
   confint(time_roc_res, level = 0.95)$CI_AUC
 
-## Plot
+  ## Plot
   ## Color ## Ref: https://www.jianshu.com/p/21971df8e2e4
   # library(wesanderson)
   # names(wes_palettes)
@@ -79,7 +77,7 @@ timesseq.set <- seq(from=1, to=10, by=2)
   rm(i)
 
 
-##### Beautify Figures #####
+  ##### Beautify Figures #####
   time_ROC_df <- data.frame(
     TP_3year = time_roc_res$TP[, 1],
     FP_3year = time_roc_res$FP[, 1],
@@ -124,11 +122,11 @@ timesseq.set <- seq(from=1, to=10, by=2)
       )
 
   }
-  print(P.ROC)
+  P.ROC
 
   P.ROC2 <- P.ROC + geom_abline(slope = 1, intercept = 0, color = "grey", size = 1, linetype = 2)+
-            theme_classic() + # White background
-            labs(x = "False positive rate", y = "True positive rate")+
+    theme_classic() + # White background
+    labs(x = "False positive rate", y = "True positive rate") +
     theme(axis.line = element_line(colour = "black",
                                    size = 0, linetype = "solid")) + # Change the line type and color of axis lines
     theme(axis.text.x = element_text(face="bold", color="black",
@@ -137,14 +135,14 @@ timesseq.set <- seq(from=1, to=10, by=2)
                                      size=17, angle=0)) +  # Change the appearance and the orientation angle
     ggtitle("ROC Curve")+ # Change the main title and axis labels
 
-     theme(
+    theme(
       plot.title = element_text(color="black", size=20, face="bold", hjust = 0.5),
       axis.title.x = element_text(color="black", size=20, face="bold"),
       axis.title.y = element_text(color="black", size=20, face="bold"), # Change the color, the size and the face of  the main title, x and y axis labels
       aspect.ratio=1)+
     theme(panel.background = element_rect(fill = "white", colour = "black",  size = 2.5))
 
-  P.ROC2
+  print(P.ROC2)
 
   plotAUCcurve(time_roc_res, conf.int=TRUE, col="red")
   legend("bottomright",colnames(mayo)[3], col = c("red"), lty=1, lwd=2)
@@ -159,7 +157,16 @@ timesseq.set <- seq(from=1, to=10, by=2)
   dev.off()
 
   ##### Optimal threshold for ROC（cutoff）#####
-  mayo[,3][which.max(time_ROC_df$TP_3year - time_ROC_df$FP_3year)]
+  cutoff <- mayo[,3][which.max(time_ROC_df$TP_3year - time_ROC_df$FP_3year)]
+
+  Output <- list(time_roc_res = time_roc_res,
+                 time_ROC_df = time_ROC_df,
+                 cutoff = cutoff)
+
+  return(Output)
+}
+
+
 
 
 ####################################################################################################
