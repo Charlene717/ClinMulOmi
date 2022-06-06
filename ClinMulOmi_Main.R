@@ -47,6 +47,7 @@
   ##### Function setting #####
     ## Call function
     source("FUN_TimeDepROC.R")
+    source("FUN_DFCutoffSet.R")
 
 ##### Load database ####
   data(mayo)
@@ -122,14 +123,30 @@
              conf.int = TRUE, risk.table = TRUE)
 
   ##
-  ggsurvplot(fit2,  size = 1,  # change line size
-             linetype = "strata", # change line type by groups
-             break.time.by = 250, # break time axis by 250
+  ggsurvplot(fit2,
+             ## Setting of main Fig
+             # # Change font size, style and color at the same time
+             title=paste0(Tar," (",OSTimeSetting," years survival)"),
+             # main = "Survival curve", # No function
+             # font.main = c(16, "bold", "darkblue"),
+             # font.x = c(14, "bold.italic", "darkblue"),
+             # font.y = c(14, "bold.italic", "darkblue"),
+             # font.tickslab = c(12, "plain", "darkgreen"),
+             # legend = c(0.2, 0.2), # Change legend posistion
+             legend.title = paste0(Tar," (ROC)"),
+             legend.labs = c(paste0(Tar,"_High"), paste0(Tar,"_Low")),
+
+             size = 1,  # change line size
+             # linetype = "strata", # change line type by groups
              palette = c("#ef476f", "#0077b6"), # custom color palette
              conf.int = TRUE, # Add confidence interval
              pval = TRUE, # Add p-value,
              pval.coord = c(100, 0.03), # Change p-value posistion
+             xlim = c(0, 5*365), # Change x axis limits
+
+             ## Set risk.table
              risk.table = TRUE, # Add risk table
+             break.time.by = 250, # break time axis by 250
              risk.table.col = "strata" # Change risk table color by groups
   )
 
