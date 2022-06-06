@@ -1,18 +1,3 @@
-#### Dataframe with cutoff setting ####
-## Test Function
-mayo3 <- DFCutoffSet(mayo, cutoffKM = ROCResultSeq_mayo5[["cutoff"]][["5_years"]],
-                     OSTimeSetting = 5,
-                     Tar="mayoscore5", time = "time", censor="censor")
-
-##### KM plot ####
-fit<- survfit(Surv(ReTime, Status) ~ 1, data = mayo3)
-ggsurvplot(fit)
-
-fit2<- survfit(Surv(ReTime, Status) ~ ROCGrp, data = mayo3)
-ggsurvplot(fit2)
-
-
-
 
 DFCutoffSet <- function(mayo, cutoffKM, OSTimeSetting,
                         Tar="mayoscore5", time = "time", censor="censor") {
