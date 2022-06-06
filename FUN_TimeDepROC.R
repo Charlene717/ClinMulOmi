@@ -133,7 +133,7 @@ TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor=
 
   #### Basic AUC plot ####
     plotAUCcurve(time_roc_res, conf.int=TRUE, col="red")
-    legend("bottomright",colnames(mayo)[3], col = c("red"), lty=1, lwd=2)
+    legend("bottomright",colnames(mayo)[Tar], col = c("red"), lty=1, lwd=2)
 
   #### Export PDF ####
     pdf(file = paste0(Save.Path,"/",ProjectName,"_ROC.pdf"),
@@ -142,12 +142,12 @@ TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor=
     # ROC
       print(P.ROC2)
       plotAUCcurve(time_roc_res, conf.int=TRUE, col="red")
-      legend("bottomright",colnames(mayo)[3], col = c("red"), lty=1, lwd=2)
+      legend("bottomright",colnames(mayo)[Tar], col = c("red"), lty=1, lwd=2)
 
     dev.off()
 
   ##### Optimal threshold for ROC（cutoff）#####
-    cutoff <- mayo[,3][which.max(time_ROC_df$TP_3year - time_ROC_df$FP_3year)]
+    cutoff <- mayo[,Tar][which.max(time_ROC_df$TP_3year - time_ROC_df$FP_3year)]
 
     Output <- list(time_roc_res = time_roc_res,
                    time_ROC_df = time_ROC_df,
