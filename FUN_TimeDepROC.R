@@ -3,7 +3,8 @@
 ## Paper: https://bmcmedresmethodol.biomedcentral.com/articles/10.1186/s12874-017-0332-6
 
 
-TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor="censor") {
+TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor="censor",
+                       save.path = "",Filename="") {
   ##### Load Packages #####
     #### Basic installation ####
     Package.set <- c("tidyverse","timeROC","survival","survivalROC","colorspace")
@@ -147,7 +148,12 @@ TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor=
     plotAUCcurve(time_roc_res2, conf.int=TRUE, col="blue")
     legend("bottomright",Tar, col = c("blue"), lty=1, lwd=2)
   #### Export PDF ####
-    pdf(file = paste0(Save.Path,"/",ProjectName,"_ROC.pdf"),
+    ## Create new folder
+    if (!dir.exists(save.path)){
+      dir.create(save.path)
+    }
+
+    pdf(file = paste0(save.path,"/ROC_",Filename,".pdf"),
         width = 7,  height = 7
     )
     # ROC
