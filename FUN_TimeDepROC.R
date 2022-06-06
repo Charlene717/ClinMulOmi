@@ -154,7 +154,7 @@ TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor=
     }
 
     pdf(file = paste0(save.path,"/ROC_",Filename,".pdf"),
-        width = 7,  height = 7
+        width = 10,  height = 10
     )
     # ROC
       print(P.ROC2)
