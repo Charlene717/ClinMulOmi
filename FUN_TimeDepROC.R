@@ -24,6 +24,8 @@
 
   ## Test fuction
   ROCResult <- TimeDepROC(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor="censor")
+  ROCResult1 <- TimeDepROC(mayo,5,Tar="mayoscore5",time = "time", censor="censor")
+
 
 TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor="censor") {
   ##### Load Packages #####
@@ -103,7 +105,7 @@ TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor=
 
     P.ROC <-  ggplot(data = time_ROC_df)
     for (i in  1:length(timesseq.set)) {
-      P.ROC <- P.ROC + geom_line(aes_string(x = time_ROC_df[,timesseq.set[i]+1], y = time_ROC_df[,timesseq.set[i]]), size = 1.5, color = qualitative_hcl(length(timesseq.set))[i])+
+      P.ROC <- P.ROC + geom_line(aes_string(x = time_ROC_df[,paste0("FP_",timesseq.set[i],"years")], y = time_ROC_df[,paste0("TP_",timesseq.set[i],"years")]), size = 1.5, color = qualitative_hcl(length(timesseq.set))[i])+
         annotate("text", x = 0.75, y = 0.55 -i*0.05, size = 7,
                  label = paste0("AUC at ",timesseq.set[i]," years = ", sprintf("%.3f", time_roc_res$AUC[[i]])), color = qualitative_hcl(length(timesseq.set))[i]
         )
