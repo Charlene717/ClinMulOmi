@@ -133,7 +133,7 @@ TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor=
 
   #### Basic AUC plot ####
     plotAUCcurve(time_roc_res, conf.int=TRUE, col="red")
-    legend("bottomright",colnames(mayo)[Tar], col = c("red"), lty=1, lwd=2)
+    legend("bottomright",Tar, col = c("red"), lty=1, lwd=2)
 
   #### Export PDF ####
     pdf(file = paste0(Save.Path,"/",ProjectName,"_ROC.pdf"),
@@ -142,7 +142,7 @@ TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor=
     # ROC
       print(P.ROC2)
       plotAUCcurve(time_roc_res, conf.int=TRUE, col="red")
-      legend("bottomright",colnames(mayo)[Tar], col = c("red"), lty=1, lwd=2)
+      legend("bottomright",Tar, col = c("red"), lty=1, lwd=2)
 
     dev.off()
 
