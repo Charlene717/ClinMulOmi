@@ -51,10 +51,26 @@
 
 ##### TimeDepROC #####
 
-  ROCResult <- TimeDepROC(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor="censor",
-                          save.path = Save.Path ,Filename="Seq")
-  ROCResult1 <- TimeDepROC(mayo,5,Tar="mayoscore5",time = "time", censor="censor",
-                           save.path = Save.Path ,Filename="5years")
+  ROCResultSeq_mayo4 <- TimeDepROC(mayo,timesseq.set,Tar="mayoscore4",time = "time", censor="censor",
+                          save.path = Save.Path , Filename="Seq_mayo4")
+
+  ROCResultSeq_mayo5 <- TimeDepROC(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor="censor",
+                             save.path = Save.Path , Filename="Seq_mayo5")
+
+
+  ROCResult_5Y <- TimeDepROC(mayo,5,Tar="mayoscore4",time = "time", censor="censor",
+                                save.path = Save.Path , Filename="5years_mayo5")
+
+  ROCResult_10Y <- TimeDepROC(mayo,10,Tar="mayoscore5",time = "time", censor="censor",
+                            save.path = Save.Path , Filename="10years_mayo5")
+
+  ## Compare two time-dependent AUC
+  plotAUCcurve(ROCResultSeq_mayo4[["time_roc_res"]], conf.int=TRUE, col="red")
+  plotAUCcurve(ROCResultSeq_mayo5[["time_roc_res"]], conf.int=TRUE, col="blue", add=TRUE)
+  legend("bottomright",c("mayoscore4", "mayoscore5"), col = c("red","blue"), lty=1, lwd=2)
+  dev.off()
+
+
 
 
 
