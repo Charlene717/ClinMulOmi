@@ -28,7 +28,7 @@
 TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor="censor") {
   ##### Load Packages #####
     #### Basic installation ####
-    Package.set <- c("tidyverse","timeROC","survival","survivalROC")
+    Package.set <- c("tidyverse","timeROC","survival","survivalROC","colorspace")
     ## Check whether the installation of those packages is required from basic
     for (i in 1:length(Package.set)) {
       if (!requireNamespace(Package.set[i], quietly = TRUE)){
@@ -61,8 +61,9 @@ TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor=
   # names(wes_palettes)
 
   ## Color ## Ref: https://bookdown.org/wangminjie/R4DS/tidyverse-ggplot2-colors.html
-  library(colorspace)
+  ## Color ## Ref: https://cran.r-project.org/web/packages/colorspace/vignettes/colorspace.html
 
+  library(colorspace)
 
   for (i in 1:length(timesseq.set)) {
     if(i==1){
@@ -197,6 +198,7 @@ TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor=
 
 ## Optimal threshold for ROC（cutoff）
   mayo$mayoscore5[which.max(time_ROC_df$TP_3year - time_ROC_df$FP_3year)]
+
 
 
 
