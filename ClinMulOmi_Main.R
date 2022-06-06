@@ -17,16 +17,10 @@
   Version = paste0(Sys.Date(),"_",ProjectName,"_",Sampletype)
   Save.Path = paste0(getwd(),"/",Version)
 
-  Save_Path = save.path
   ## Create new folder
-  if (!dir.exists(Save_Path)){
-    dir.create(Save_Path)
-  }
-
-## Create new folder
-  if (!dir.exists(Save.Path)){
-    dir.create(Save.Path)
-  }
+    if (!dir.exists(Save.Path)){
+      dir.create(Save.Path)
+    }
 
 ##### Parameter setting* #####
   timesseq.set <- seq(from=1, to=10, by=2)  ## timesseq.set <- c(1,3,5,7,9)
@@ -123,7 +117,9 @@
              conf.int = TRUE, risk.table = TRUE)
 
   ##
-  ggsurvplot(fit2,
+  Tar="mayoscore5"
+  OSTimeSetting=5
+  ggsurvplot(fit,
              ## Setting of main Fig
              # # Change font size, style and color at the same time
              title=paste0(Tar," (",OSTimeSetting," years survival)"),
@@ -150,6 +146,8 @@
              risk.table.col = "strata" # Change risk table color by groups
   ) -> P.KM
 
+  P.KM
+
   ## Export PDF
   pdf(file = paste0(Save.Path,"/",ProjectName,"_KMCurve.pdf"),
       width = 7,  height = 7
@@ -158,21 +156,4 @@
   dev.off()
 
 ################################################################
-
-
-  #### Plot KM curve ####
-  fit<- survfit(Surv(time, censor) ~ 1, data = mayo)
-  ggsurvplot(fit)
-
-  # OS
-  fit_OS <- survfit(Surv(Survival.in.days, Vital.status) ~ NKIndexROC, data = Bulk_GSE13255_4_M1_PhenoROC2)
-  fit_OS_P <- surv_pvalue(fit_OS)
-  fit_OS_ggplot <-  ggsurvplot(fit_OS, pval = TRUE,
-                               risk.table = TRUE,
-                               legend.title = paste0(Marker,"(ROC)"),
-                               legend.labs = c(paste0(Marker,"_High"), paste0(Marker,"_Low")),
-                               title=paste0("OS"," (",OSTimeSetting," years survival)"),
-                               log.rank.weights="1",xlim = c(0, OSTimeSetting*365))
-  fit_OS_ggplot
-
 
