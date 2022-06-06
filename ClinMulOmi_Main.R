@@ -81,12 +81,37 @@
     legend("bottomright",c("mayoscore4", "mayoscore5"), col = c("red","blue"), lty=1, lwd=2)
   dev.off()
 
-  ## df for ggplot
-  result.confint <- confint(object = ROCResultSeq_mayo5[["time_roc_res"]], level = 0.95,
-                            n.sim = 3000)
+  # ## (Pending) ## df for ggplot
+  # ## df for ggplot
+  # result.confint <- confint(object = ROCResultSeq_mayo5[["time_roc_res"]], level = 0.95,
+  #                           n.sim = 3000)
 
 
 
 ####################################################################################################
+
+  ##### Plot the KM curve #####
+  ## Ref: https://blog.yjtseng.info/post/2020-05-13-survival-curve/
+  ## Ref: http://www.sthda.com/english/wiki/survminer-r-package-survival-data-analysis-and-visualization
+  ## Ref: https://www.rdocumentation.org/packages/survminer/versions/0.4.9/topics/ggsurvplot
+  library(survival)
+  library(survminer)
+
+
+
+  #### Plot KM curve ####
+  fit<- survfit(Surv(time, censor) ~ 1, data = mayo)
+  ggsurvplot(fit)
+
+  # OS
+  fit_OS <- survfit(Surv(Survival.in.days, Vital.status) ~ NKIndexROC, data = Bulk_GSE13255_4_M1_PhenoROC2)
+  fit_OS_P <- surv_pvalue(fit_OS)
+  fit_OS_ggplot <-  ggsurvplot(fit_OS, pval = TRUE,
+                               risk.table = TRUE,
+                               legend.title = paste0(Marker,"(ROC)"),
+                               legend.labs = c(paste0(Marker,"_High"), paste0(Marker,"_Low")),
+                               title=paste0("OS"," (",OSTimeSetting," years survival)"),
+                               log.rank.weights="1",xlim = c(0, OSTimeSetting*365))
+  fit_OS_ggplot
 
 
