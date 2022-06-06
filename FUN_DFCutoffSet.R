@@ -3,6 +3,9 @@
 cutoffKM <- ROCResultSeq_mayo5[["cutoff"]][["5_years"]]
 OSTimeSetting <- 5
 
+## Test Function
+mayo3 <- DFCutoffSet(mayo, cutoffKM, OSTimeSetting,
+                     Tar="mayoscore5", time = "time", censor="censor")
 
 DFCutoffSet <- function(mayo, cutoffKM, OSTimeSetting,
                         Tar="mayoscore5", time = "time", censor="censor") {
@@ -22,43 +25,42 @@ DFCutoffSet <- function(mayo, cutoffKM, OSTimeSetting,
 
   ##### Revise the survival time and status #####
   ## !!!Please check the survfit package whether the setting of N-years survival has already included in this package
-  mayo2 <- mayo
-  mayo2$ReTime <- ""
-  mayo2$Status <- ""
+  mayo$ReTime <- ""
+  mayo$Status <- ""
 
-  for (i in c(1:length(mayo2[,1]))) {
-    if(mayo2[i,time] >= OSTimeSetting*365){
-      mayo2$ReTime[i] <- OSTimeSetting*365
-      if(mayo2[i,censor]==0){
-        mayo2$Status[i] <- 0
+  for (i in c(1:length(mayo[,1]))) {
+    if(mayo[i,time] >= OSTimeSetting*365){
+      mayo$ReTime[i] <- OSTimeSetting*365
+      if(mayo[i,censor]==0){
+        mayo$Status[i] <- 0
       }else{
-        mayo2$Status[i] <- NA
+        mayo$Status[i] <- NA
       }
 
-    }else if(mayo2[i,time] < OSTimeSetting*365){
-      mayo2$ReTime[i] <- mayo2[i,time]
-      mayo2$Status[i] <- mayo2[i,censor]
+    }else if(mayo[i,time] < OSTimeSetting*365){
+      mayo$ReTime[i] <- mayo[i,time]
+      mayo$Status[i] <- mayo[i,censor]
     }else{
-      mayo2$ReTime[i] <- c("error")
-      mayo2$Status[i] <- c("error")
+      mayo$ReTime[i] <- c("error")
+      mayo$Status[i] <- c("error")
     }
   }
 
-  mayo2$ReTime <- mayo2$ReTime %>% as.numeric()
-  mayo2$Status <- mayo2$Status %>% as.numeric()
-  # mayo2 <- mayo2[!is.na(mayo2$Status),]
+  mayo$ReTime <- mayo$ReTime %>% as.numeric()
+  mayo$Status <- mayo$Status %>% as.numeric()
+  # mayo <- mayo[!is.na(mayo$Status),]
 
 
-  return(df)
+  return(mayo)
 }
 
 
 
 
 ##### KM plot ####
-fit<- survfit(Surv(ReTime, Status) ~ 1, data = mayo2)
+fit<- survfit(Surv(ReTime, Status) ~ 1, data = mayo)
 ggsurvplot(fit)
 
-fit2<- survfit(Surv(ReTime, Status) ~ ROCGroup, data = mayo2)
+fit2<- survfit(Surv(ReTime, Status) ~ ROCGroup, data = mayo)
 ggsurvplot(fit2)
 
