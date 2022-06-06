@@ -19,6 +19,9 @@
 
 ##### Parameter setting* #####
   timesseq.set <- seq(from=1, to=10, by=2)
+  timesseq.set <- c(1,3,5,7,9)
+  timesseq.set <- c(1,5,9)
+  timesseq.set <- c(2,4,6,8,10)
 
   data(mayo)
 
@@ -84,19 +87,28 @@ TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor=
 
   #### Beautify ROC plot ####
     ## Dataframe for ggplot
-    for (i in 1:length(timesseq.set)) {
-      if(i==1){
-        time_ROC_df <- data.frame( time_roc_res$TP[, i], time_roc_res$FP[, i])
+    if(length(timesseq.set)==1){
+      for (i in 1:length(timesseq.set)) {
+        time_ROC_df <- data.frame( time_roc_res$TP[, 2], time_roc_res$FP[, 2])
         colnames(time_ROC_df) <- c(paste0("TP_",timesseq.set[i],"years"),paste0("FP_",timesseq.set[i],"years"))
-
-      }else{
-        time_ROC_df_Temp <- data.frame( time_roc_res$TP[, i], time_roc_res$FP[, i])
-        colnames(time_ROC_df_Temp) <- c(paste0("TP_",timesseq.set[i],"years"),paste0("FP_",timesseq.set[i],"years"))
-        time_ROC_df <- cbind(time_ROC_df,time_ROC_df_Temp)
       }
+      rm(i)
+    }else{
+      for (i in 1:length(timesseq.set)) {
+        if(i==1){
+          time_ROC_df <- data.frame( time_roc_res$TP[, i], time_roc_res$FP[, i])
+          colnames(time_ROC_df) <- c(paste0("TP_",timesseq.set[i],"years"),paste0("FP_",timesseq.set[i],"years"))
+
+        }else{
+          time_ROC_df_Temp <- data.frame( time_roc_res$TP[, i], time_roc_res$FP[, i])
+          colnames(time_ROC_df_Temp) <- c(paste0("TP_",timesseq.set[i],"years"),paste0("FP_",timesseq.set[i],"years"))
+          time_ROC_df <- cbind(time_ROC_df,time_ROC_df_Temp)
+        }
+
+      }
+      rm(i,time_ROC_df_Temp)
 
     }
-    rm(i,time_ROC_df_Temp)
 
     ## ggplot
     library(ggplot2)
@@ -104,14 +116,26 @@ TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor=
     ## Ref: https://stackoverflow.com/questions/27852620/using-geom-line-in-a-for-loop
 
     P.ROC <-  ggplot(data = time_ROC_df)
-    for (i in  1:length(timesseq.set)) {
-      P.ROC <- P.ROC + geom_line(aes_string(x = time_ROC_df[,paste0("FP_",timesseq.set[i],"years")], y = time_ROC_df[,paste0("TP_",timesseq.set[i],"years")]), size = 1.5, color = qualitative_hcl(length(timesseq.set))[i])+
-        annotate("text", x = 0.75, y = 0.55 -i*0.05, size = 7,
-                 label = paste0("AUC at ",timesseq.set[i]," years = ", sprintf("%.3f", time_roc_res$AUC[[i]])), color = qualitative_hcl(length(timesseq.set))[i]
-        )
 
+    if(length(timesseq.set)==1){
+      for (i in  1:length(timesseq.set)) {
+        P.ROC <- P.ROC + geom_line(aes_string(x = time_ROC_df[,paste0("FP_",timesseq.set[i],"years")], y = time_ROC_df[,paste0("TP_",timesseq.set[i],"years")]), size = 1.5, color = qualitative_hcl(length(timesseq.set))[i])+
+          annotate("text", x = 0.75, y = 0.55 -i*0.05, size = 7,
+                   label = paste0("AUC at ",timesseq.set[i]," years = ", sprintf("%.3f", time_roc_res$AUC[[2]])), color = qualitative_hcl(length(timesseq.set))[i]
+          )
+
+      }
+      P.ROC
+    }else{
+      for (i in  1:length(timesseq.set)) {
+        P.ROC <- P.ROC + geom_line(aes_string(x = time_ROC_df[,paste0("FP_",timesseq.set[i],"years")], y = time_ROC_df[,paste0("TP_",timesseq.set[i],"years")]), size = 1.5, color = qualitative_hcl(length(timesseq.set))[i])+
+          annotate("text", x = 0.75, y = 0.55 -i*0.05, size = 7,
+                   label = paste0("AUC at ",timesseq.set[i]," years = ", sprintf("%.3f", time_roc_res$AUC[[i]])), color = qualitative_hcl(length(timesseq.set))[i]
+          )
+
+      }
+      P.ROC
     }
-    P.ROC
 
     P.ROC2 <- P.ROC + geom_abline(slope = 1, intercept = 0, color = "grey", size = 1, linetype = 2)+
       theme_classic() + # White background
@@ -149,13 +173,14 @@ TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor=
     dev.off()
 
   ##### Optimal threshold for ROC（cutoff）#####
+
     for (i in 1:length(timesseq.set)) {
       if(i==1){
-        cutoff.df <- as.data.frame(mayo[,Tar][which.max(time_ROC_df[,timesseq.set[i]] - time_ROC_df[,timesseq.set[i]+1])])
+        cutoff.df <- as.data.frame(mayo[,Tar][which.max(time_ROC_df[,paste0("TP_",timesseq.set[i],"years")] - time_ROC_df[,paste0("FP_",timesseq.set[i],"years")])])
         colnames(cutoff.df) <- paste0(timesseq.set[i],"_years")
 
       }else{
-        cutoff_Temp.df <- as.data.frame(mayo[,Tar][which.max(time_ROC_df[,timesseq.set[i]] - time_ROC_df[,timesseq.set[i]+1])])
+        cutoff_Temp.df <- as.data.frame(mayo[,Tar][which.max(time_ROC_df[,paste0("TP_",timesseq.set[i],"years")] - time_ROC_df[,paste0("FP_",timesseq.set[i],"years")])])
         colnames(cutoff_Temp.df) <- paste0(timesseq.set[i],"_years")
         cutoff.df <- cbind(cutoff.df,cutoff_Temp.df)
       }
@@ -168,8 +193,8 @@ TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor=
                    time_ROC_df = time_ROC_df,
                    cutoff = cutoff.df)
 
-  return(Output)
-}
+    return(Output)
+    }
 
 
 
