@@ -78,15 +78,6 @@ TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor=
 
 
   ##### Beautify Figures #####
-  time_ROC_df <- data.frame(
-    TP_3year = time_roc_res$TP[, 1],
-    FP_3year = time_roc_res$FP[, 1],
-    TP_5year = time_roc_res$TP[, 2],
-    FP_5year = time_roc_res$FP[, 2],
-    TP_10year = time_roc_res$TP[, 3],
-    FP_10year = time_roc_res$FP[, 3]
-  )
-
   for (i in 1:length(timesseq.set)) {
     if(i==1){
       time_ROC_df <- data.frame( time_roc_res$TP[, i], time_roc_res$FP[, i])
@@ -104,15 +95,6 @@ TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor=
   library(ggplot2)
   ## Using-geom-line-in-a-for-loop
   ## Ref: https://stackoverflow.com/questions/27852620/using-geom-line-in-a-for-loop
-  # p <-  ggplot(data = time_ROC_df)
-  #  for (i in  seq(from=1, to=length(timesseq.set)*2, by=2)) {
-  #    p <- p + geom_line(aes_string(x = time_ROC_df[,i+1], y = time_ROC_df[,i]), size = 1, color = qualitative_hcl(length(timesseq.set))[which(timesseq.set==i)])+
-  #             annotate("text", x = 0.75, y = 0.55 -which(timesseq.set==i)*0.1, size = 4.5,
-  #             label = paste0("AUC at ",timesseq.set[which(timesseq.set==i)]," years = ", sprintf("%.3f", time_roc_res$AUC[[which(timesseq.set==i)]])), color = qualitative_hcl(length(timesseq.set))[which(timesseq.set==i)]
-  #      )
-  #
-  #  }
-  # print(p)
 
   P.ROC <-  ggplot(data = time_ROC_df)
   for (i in  1:length(timesseq.set)) {
@@ -151,9 +133,7 @@ TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor=
   pdf(file = paste0(Save.Path,"/",ProjectName,"_ROC.pdf"),
       width = 7,  height = 7
   )
-
-  P.ROC2
-
+    P.ROC2
   dev.off()
 
   ##### Optimal threshold for ROC（cutoff）#####
