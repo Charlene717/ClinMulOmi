@@ -4,6 +4,7 @@
 
 
 TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor="censor",
+                       timeROC.lt = list(cause = 1, weighting="marginal", ROC = TRUE, iid = TRUE),
                        save.path = "",Filename="") {
   ##### Load Packages #####
     #### Basic installation ####
@@ -20,15 +21,13 @@ TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor=
 
 
   ##### timeROC #####
+  formals(timeROC)[names(timeROC.lt)] <- timeROC.lt
+
   time_roc_res <- timeROC(
     T = mayo[,time],
     delta = mayo[,censor],
     marker = mayo[,Tar],
-    cause = 1,
-    weighting="marginal",
-    times = timesseq.set*365,
-    ROC = TRUE,
-    iid = TRUE
+    times = timesseq.set*365
   )
 
   time_roc_res$AUC
