@@ -161,6 +161,18 @@ TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor=
     plotAUCcurve(time_roc_res, conf.int=TRUE, col="red")
     legend("bottomright",Tar, col = c("red"), lty=1, lwd=2)
 
+    time_roc_res2 <- timeROC(
+      T = mayo[,time],
+      delta = mayo[,censor],
+      marker = mayo[,Tar],
+      cause = 1,
+      weighting="marginal",
+      times = seq(from=1, to= floor(max(mayo[,time])/365), by=1)*365,
+      ROC = TRUE,
+      iid = TRUE
+    )
+    plotAUCcurve(time_roc_res2, conf.int=TRUE, col="blue")
+    legend("bottomright",Tar, col = c("blue"), lty=1, lwd=2)
   #### Export PDF ####
     pdf(file = paste0(Save.Path,"/",ProjectName,"_ROC.pdf"),
         width = 7,  height = 7
@@ -170,6 +182,8 @@ TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor=
       plotAUCcurve(time_roc_res, conf.int=TRUE, col="red")
       legend("bottomright",Tar, col = c("red"), lty=1, lwd=2)
 
+      plotAUCcurve(time_roc_res2, conf.int=TRUE, col="blue")
+      legend("bottomright",Tar, col = c("blue"), lty=1, lwd=2)
     dev.off()
 
   ##### Optimal threshold for ROC（cutoff）#####
