@@ -1,3 +1,7 @@
+#### Time-dependent-ROC
+## Ref: https://www.bioinfo-scrounger.com/archives/Time-dependent-ROC/
+## Paper: https://bmcmedresmethodol.biomedcentral.com/articles/10.1186/s12874-017-0332-6
+
 
 TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor="censor") {
   ##### Load Packages #####
