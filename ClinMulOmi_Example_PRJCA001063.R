@@ -273,19 +273,21 @@
   library(survival)
   library(survminer)
 
+  Target = "Ductal.cell.type.2"
+  OSTimeSetting = 1
+
   ## Dataframe with cutoff setting
-  mayo <- DFCutoffSet(mayo, cutoffKM = ROCResultSeq_mayo5[["cutoff"]][["5_years"]],
-                      OSTimeSetting = 5,
-                      Tar="mayoscore5", time = "time", censor="censor")
+  res_quantiseq_Temp <- DFCutoffSet(res_quantiseq_Temp, OSTimeSetting = 1,
+                                    cutoffKM = ROCResultSeq.lt[[Target]][["cutoff"]][["1_years"]],
+                                    Tar = Target, time = "OStime", censor="OS")
 
   ## KM plot
-
   # Draw survival curves without grouping
-  fit_all <- survfit(Surv(ReTime, Status) ~ 1, data = mayo)
+  fit_all <- survfit(Surv(ReTime, Status) ~ 1, data = res_quantiseq_Temp)
   ggsurvplot(fit_all)
 
   # Draw survival curves with grouping
-  fit <- survfit(Surv(ReTime, Status) ~ ROCGrp, data = mayo)
+  fit <- survfit(Surv(ReTime, Status) ~ ROCGrp, data = res_quantiseq_Temp)
   # Basic plots
   ggsurvplot(fit)
   # Add p-value,
@@ -297,21 +299,20 @@
   ggsurvplot(fit, pval = TRUE, pval.coord = c(100, 0.03),
              conf.int = TRUE, risk.table = TRUE)
 
-  ##
-  Tar="mayoscore5"
-  OSTimeSetting=5
+  ## Beautify Figure
+  Target2 <- gsub("\\.", " ",Target)
   ggsurvplot(fit,
              ## Setting of main Fig
              # # Change font size, style and color at the same time
-             title=paste0(Tar," (",OSTimeSetting," years survival)"),
+             title=paste0(Target2," (",OSTimeSetting," years survival)"),
              # main = "Survival curve", # No function
              # font.main = c(16, "bold", "darkblue"),
              # font.x = c(14, "bold.italic", "darkblue"),
              # font.y = c(14, "bold.italic", "darkblue"),
              # font.tickslab = c(12, "plain", "darkgreen"),
              # legend = c(0.2, 0.2), # Change legend posistion
-             legend.title = paste0(Tar," (ROC)"),
-             legend.labs = c(paste0(Tar,"_High"), paste0(Tar,"_Low")),
+             legend.title = paste0(Target2," (ROC)"),
+             legend.labs = c(paste0(Target2,"_High"), paste0(Target2,"_Low")),
 
              size = 1,  # change line size
              # linetype = "strata", # change line type by groups
@@ -319,7 +320,7 @@
              conf.int = TRUE, # Add confidence interval
              pval = TRUE, # Add p-value,
              pval.coord = c(100, 0.03), # Change p-value posistion
-             xlim = c(0, 5*365), # Change x axis limits
+             xlim = c(0, OSTimeSetting*365), # Change x axis limits
 
              ## Set risk.table
              risk.table = TRUE, # Add risk table
@@ -330,13 +331,54 @@
   P.KM
 
   ## Export PDF
-  pdf(file = paste0(Save.Path,"/",ProjectName,"_KMCurve.pdf"),
-      width = 7,  height = 7
+  pdf(file = paste0(Save.Path,"/",ProjectName,"_",Target,"_KMCurve.pdf"),
+      width = 9,  height = 7
   )
   P.KM %>% print()
   dev.off()
 
+  ## All cell type
+  pdf(file = paste0(Save.Path,"/",ProjectName,"_KMCurve.pdf"),
+      width = 9,  height = 7
+  )
+  for (i in 1:length(Cell_type.set)) {
+    Target = Cell_type.set[i]
+    OSTimeSetting = 1
 
+    ## Dataframe with cutoff setting
+    res_quantiseq_Temp <- DFCutoffSet(res_quantiseq_Temp, OSTimeSetting = 1,
+                                      cutoffKM = ROCResultSeq.lt[[Target]][["cutoff"]][["1_years"]],
+                                      Tar = Target, time = "OStime", censor="OS")
+    # Draw survival curves with grouping
+    fit <- survfit(Surv(ReTime, Status) ~ ROCGrp, data = res_quantiseq_Temp)
+
+    ## Beautify Figure
+    Target2 <- gsub("\\.", " ",Target)
+    ggsurvplot(fit,
+               ## Setting of main Fig
+               # # Change font size, style and color at the same time
+               title=paste0(Target2," (",OSTimeSetting," years survival)"),
+               legend.title = paste0(Target2," (ROC)"),
+               legend.labs = c(paste0(Target2,"_High"), paste0(Target2,"_Low")),
+
+               size = 1,  # change line size
+               # linetype = "strata", # change line type by groups
+               palette = c("#ef476f", "#0077b6"), # custom color palette
+               conf.int = TRUE, # Add confidence interval
+               pval = TRUE, # Add p-value,
+               pval.coord = c(100, 0.03), # Change p-value posistion
+               xlim = c(0, OSTimeSetting*365), # Change x axis limits
+
+               ## Set risk.table
+               risk.table = TRUE, # Add risk table
+               break.time.by = 250, # break time axis by 250
+               risk.table.col = "strata" # Change risk table color by groups
+    ) -> P.KM
+
+    print(P.KM)
+
+  }
+  dev.off()
 
 
 
