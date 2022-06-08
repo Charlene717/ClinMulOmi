@@ -39,6 +39,7 @@
 
 ##### Current path and new folder setting*  #####
   ProjectName = "TOP2A" # Secret, ECM, CC
+  Filename = "PADC"
   Version = paste0(Sys.Date(),"_",ProjectName,"_PADC")
   Save.Path = paste0(getwd(),"/",Version)
   ## Create new folder
@@ -144,11 +145,11 @@
 
   res_quantiseq = deconvolute_epic_custom(BulkGE.df, CTMarker.df, VariableFeatures(object = scRNA.SeuObj))
 
-  ## Cibersort
-  ## Ref: https://omnideconv.org/immunedeconv/articles/immunedeconv.html#special-case-cibersort
-  BulkGE.df[BulkGE.df==0] <- 0.00001
-  CTMarker.df[CTMarker.df==0] <- 0.00001
-  res_quantiseq = deconvolute_cibersort_custom(BulkGE.df, CTMarker.df)
+  # ## Cibersort
+  # ## Ref: https://omnideconv.org/immunedeconv/articles/immunedeconv.html#special-case-cibersort
+  # BulkGE.df[BulkGE.df==0] <- 0.00001
+  # CTMarker.df[CTMarker.df==0] <- 0.00001
+  # res_quantiseq = deconvolute_cibersort_custom(BulkGE.df, CTMarker.df)
 
   # res_quantiseq = deconvolute_base_custom(BulkGE.df,
   #                                         CTMarker.df,
@@ -192,7 +193,7 @@
 
   res_quantiseq_Temp <- res_quantiseq_Temp[,-5:-11]
   colnames(res_quantiseq_Temp) <- gsub("\\.", "", colnames(res_quantiseq_Temp))
-  colnames(res_quantiseq_Temp) <- gsub(" ", "", colnames(res_quantiseq_Temp))
+  colnames(res_quantiseq_Temp) <- gsub(" ", ".", colnames(res_quantiseq_Temp))
 
 
   ## as.numeric
@@ -214,38 +215,47 @@
   timesseq.set <- c(1,3,5)
 
   ROCResultSeq <- TimeDepROC(res_quantiseq_Temp,timesseq.set,
-                             Tar = "Ductalcelltype2", #as.character(Cell_type.set[3])
+                             Tar = "Ductal.cell.type.2", #as.character(Cell_type.set[3])
                              time = "OStime", censor="OS",
                              save.path = Save.Path , Filename="PAAD")
 
+  ## All cell type
+  Cell_type.set <- scRNA.SeuObj@meta.data[["Cell_type"]] %>% unique() %>% as.character()
+  Cell_type.set <- gsub(" ", ".", Cell_type.set)
 
+  ROCResultSeq.lt <- list()
+  ## Export PDF
+  pdf(file = paste0(Save.Path,"/2ROC_ALL_",Filename,".pdf"),
+      width = 10,  height = 10
+  )
+    for (i in 1:length(Cell_type.set)) {
+      ROCResultSeq.lt[[Cell_type.set[i]]]<- TimeDepROC(res_quantiseq_Temp,timesseq.set,
+                                                       Tar = Cell_type.set[i], #as.character(Cell_type.set[3])
+                                                       time = "OStime", censor="OS",
+                                                       save.path = Save.Path ,
+                                                       Filename=paste0("PAAD_",
+                                                                       gsub("\\.", " ",Cell_type.set[i])))%>% print()
+    }
 
-  ROCResultSeq_mayo4 <- TimeDepROC(mayo,timesseq.set,Tar="mayoscore4",time = "time", censor="censor",
-                                   save.path = Save.Path , Filename="Seq_mayo4")
-
-  ROCResultSeq_mayo5 <- TimeDepROC(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor="censor",
-                                   save.path = Save.Path , Filename="Seq_mayo5")
-
-
-  ROCResult_5Y <- TimeDepROC(mayo,5,Tar="mayoscore4",time = "time", censor="censor",
-                             save.path = Save.Path , Filename="5years_mayo5")
-
-  ROCResult_10Y <- TimeDepROC(mayo,10,Tar="mayoscore5",time = "time", censor="censor",
-                              save.path = Save.Path , Filename="10years_mayo5")
-
-  ## Compare two time-dependent AUC
-  plotAUCcurve(ROCResultSeq_mayo4[["time_roc_res"]], conf.int=TRUE, col="red")
-  plotAUCcurve(ROCResultSeq_mayo5[["time_roc_res"]], conf.int=TRUE, col="blue", add=TRUE)
-  legend("bottomright",c("mayoscore4", "mayoscore5"), col = c("red","blue"), lty=1, lwd=2)
   dev.off()
 
-  ## Export PDF
+
+  ## Compare two time-dependent AUC
   pdf(file = paste0(Save.Path,"/",ProjectName,"_CompareAUC.pdf"),
-      width = 7,  height = 7
+      width = 17,  height = 7
   )
-  plotAUCcurve(ROCResultSeq_mayo4[["time_roc_res"]], conf.int=TRUE, col="red")
-  plotAUCcurve(ROCResultSeq_mayo5[["time_roc_res"]], conf.int=TRUE, col="blue", add=TRUE)
-  legend("bottomright",c("mayoscore4", "mayoscore5"), col = c("red","blue"), lty=1, lwd=2)
+  for (i in 1:length(Cell_type.set)) {
+    if(i==1){
+      plotAUCcurve(ROCResultSeq.lt[[i]][["time_roc_res"]], conf.int=TRUE, col=rainbow(length(Cell_type.set))[i])
+      #legend("topright",Cell_type.set[i], col = rainbow(length(Cell_type.set))[i], lty=1, lwd=2)
+
+    }else{
+      plotAUCcurve(ROCResultSeq.lt[[i]][["time_roc_res"]], conf.int=TRUE, col=rainbow(length(Cell_type.set))[i], add=TRUE)
+      #legend("topright",Cell_type.set[i], col = rainbow(length(Cell_type.set))[i], lty=1, lwd=2)
+    }
+  }
+  legend("topleft",gsub("\\.", " ",Cell_type.set), col = rainbow(length(Cell_type.set)), lty=1, lwd=2)
+
   dev.off()
 
   # ## (Pending) ## df for ggplot
