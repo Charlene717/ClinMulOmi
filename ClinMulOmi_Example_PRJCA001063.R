@@ -264,7 +264,6 @@
   #                           n.sim = 3000)
 
 
-
 #************************************************************************************************************************#
   ##### Plot the KM curve #####
   ## Ref: https://blog.yjtseng.info/post/2020-05-13-survival-curve/
@@ -332,14 +331,14 @@
 
   ## Export PDF
   pdf(file = paste0(Save.Path,"/",ProjectName,"_",Target,"_KMCurve.pdf"),
-      width = 9,  height = 7
+      width = 8,  height = 7
   )
   P.KM %>% print()
   dev.off()
 
   ## All cell type
   pdf(file = paste0(Save.Path,"/",ProjectName,"_KMCurve.pdf"),
-      width = 9,  height = 7
+      width = 8,  height = 7
   )
   for (i in 1:length(Cell_type.set)) {
     Target = Cell_type.set[i]
