@@ -132,11 +132,24 @@
   library(ggplot2)
   library(tidyr)
   library(immunedeconv)
+  set_cibersort_binary("CIBERSORT.R")
+  set_cibersort_mat("LM22.txt")
   library(tibble)
 
+  ## Man pages for omnideconv/immunedeconv
+  # https://rdrr.io/github/omnideconv/immunedeconv/man/
+
   # res_quantiseq = deconvolute_consensus_tme_custom(as.matrix(BulkGE.df),
-  #                                                    VariableFeatures(object = scRNA.SeuObj))
+  #                                                  VariableFeatures(object = scRNA.SeuObj))
+
   res_quantiseq = deconvolute_epic_custom(BulkGE.df, CTMarker.df, VariableFeatures(object = scRNA.SeuObj))
+
+  ## Cibersort
+  ## Ref: https://omnideconv.org/immunedeconv/articles/immunedeconv.html#special-case-cibersort
+  BulkGE.df[BulkGE.df==0] <- 0.00001
+  CTMarker.df[CTMarker.df==0] <- 0.00001
+  res_quantiseq = deconvolute_cibersort_custom(BulkGE.df, CTMarker.df)
+
   # res_quantiseq = deconvolute_base_custom(BulkGE.df,
   #                                         CTMarker.df,
   #                                         n_permutations = 100,
@@ -198,6 +211,7 @@
   maxandnext=function(x){list(max(x),max(x[-which.max(x)]))} ## Ref: https://bbs.pinggu.org/forum.php?mod=viewthread&action=printable&tid=1419015
   maxandnext.set <- maxandnext(res_quantiseq_Temp$OStime)
   timesseq.set <- seq(from=1, to=floor(as.numeric(maxandnext.set[2])/365), by=2) ## timesseq.set <- c(1,3,5,7,9)
+  timesseq.set <- c(1,3,5)
 
   ROCResultSeq <- TimeDepROC(res_quantiseq_Temp,timesseq.set,
                              Tar = "Ductalcelltype2", #as.character(Cell_type.set[3])
