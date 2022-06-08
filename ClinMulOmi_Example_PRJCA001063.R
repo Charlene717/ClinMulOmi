@@ -225,7 +225,7 @@
 
   ROCResultSeq.lt <- list()
   ## Export PDF
-  pdf(file = paste0(Save.Path,"/2ROC_ALL_",Filename,".pdf"),
+  pdf(file = paste0(Save.Path,"/ROC_ALL_",Filename,".pdf"),
       width = 10,  height = 10
   )
     for (i in 1:length(Cell_type.set)) {
@@ -233,7 +233,7 @@
                                                        Tar = Cell_type.set[i], #as.character(Cell_type.set[3])
                                                        time = "OStime", censor="OS",
                                                        save.path = Save.Path ,
-                                                       Filename=paste0("PAAD_",
+                                                       Filename = paste0("PAAD_",
                                                                        gsub("\\.", " ",Cell_type.set[i])))%>% print()
     }
 
@@ -379,6 +379,31 @@
   }
   dev.off()
 
+  ##### Cox proportional hazards model #####
+  ## Ref: https://www.datacamp.com/tutorial/survival-analysis-R
+  ## Ref: https://www.reneshbedre.com/blog/survival-analysis.html
+  ## Ref: https://cran.r-project.org/web/packages/survminer/vignettes/ggforest-show-interactions-hazard-ratio.html
+  ## Ref: https://rpkgs.datanovia.com/survminer/reference/ggforest.html
 
+  ##** Ref: https://wangcc.me/LSHTMlearningnote/cox.html#cox%E5%9B%9E%E6%AD%B8%E6%A8%A1%E5%9E%8B%E4%B8%AD%E5%8C%85%E6%B6%B5%E7%9A%84%E5%81%87%E8%A8%AD
+  ##** Ref: https://codingnote.cc/zh-tw/p/13034/
+
+  # Fit a Cox proportional hazards model
+  surv_object <- Surv(time = res_quantiseq_Temp$OStime, event = res_quantiseq_Temp$OS)
+  fit.coxph <- coxph(surv_object ~  Stellate.cell + Macrophage.cell + Endothelial.cell + T.cell + B.cell+
+                                    Endocrine.cell + Fibroblast.celly + Macrophage.cell +
+                                    Ductal.cell.type.2 + Endocrine.cell + Ductal.cell.type.1 + Acinar.cell,
+                     data = res_quantiseq_Temp)
+
+
+  # fit.coxph <- coxph(surv_object ~ res_quantiseq_Temp[,5] + res_quantiseq_Temp[,6] + res_quantiseq_Temp[,7] +
+  #                    Ductal.cell.type.2,
+  #                    data = res_quantiseq_Temp)
+  ggforest(fit.coxph, data = res_quantiseq_Temp,
+           noDigits = 3)
+
+
+  #### Save RData ####
+  save.image("ClinMulOmi_Example_PRJCA001063.RData")
 
 
