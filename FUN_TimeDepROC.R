@@ -133,6 +133,12 @@ TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor=
     print(P.ROC2)
 
   #### Basic time-dependent AUC plot ####
+    ## timesseq setting
+    maxandnext=function(x){list(max(x),max(x[-which.max(x)]))} ## Ref: https://bbs.pinggu.org/forum.php?mod=viewthread&action=printable&tid=1419015
+    maxandnext.set <- maxandnext(res_quantiseq_Temp$OStime)
+    timesseq.set2 <- seq(from=1, to=floor(as.numeric(maxandnext.set[2])/365), by=1) ## timesseq.set2 <- c(1,3,5,7,9)
+
+
     plotAUCcurve(time_roc_res, conf.int=TRUE, col="red")
     legend("bottomright",Tar, col = c("red"), lty=1, lwd=2)
 
@@ -142,7 +148,7 @@ TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor=
       marker = mayo[,Tar],
       cause = 1,
       weighting="marginal",
-      times = seq(from=1, to= floor(max(mayo[,time])/365), by=1)*365,
+      times = timesseq.set2*365,
       ROC = TRUE,
       iid = TRUE
     )

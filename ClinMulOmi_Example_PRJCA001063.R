@@ -101,20 +101,7 @@
 
 
   Cell_type.set <- scRNA.SeuObj@meta.data[["Cell_type"]] %>% unique()
-
   Idents(scRNA.SeuObj) <- scRNA.SeuObj$Cell_type
-
-  ## Test
-  FibCTMarker <- FindMarkers(scRNA.SeuObj, ident.1= Cell_type.set[1],only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
-
-  CellType.name <- as.character(Cell_type.set[1])
-  FibCTMarker2 <- FibCTMarker %>%
-                  rownames_to_column(var="Gene") %>%
-                  select(Gene,avg_log2FC) %>%
-                  rename(CellType.name=avg_log2FC)
-
-  colnames(FibCTMarker2)[2] <- Cell_type.set[1] %>% as.character()
-  ## Test
 
   ## About 1 hour
   for (i in 1:length(Cell_type.set)) {
@@ -150,10 +137,10 @@
   # res_quantiseq = deconvolute_consensus_tme_custom(as.matrix(BulkGE.df),
   #                                                    VariableFeatures(object = scRNA.SeuObj))
   res_quantiseq = deconvolute_epic_custom(BulkGE.df, CTMarker.df, VariableFeatures(object = scRNA.SeuObj))
-  res_quantiseq = deconvolute_base_custom(BulkGE.df,
-                                          CTMarker.df,
-                                          n_permutations = 100,
-                                          log10 = F)
+  # res_quantiseq = deconvolute_base_custom(BulkGE.df,
+  #                                         CTMarker.df,
+  #                                         n_permutations = 100,
+  #                                         log10 = F)
   res_quantiseq <- res_quantiseq %>% as.data.frame()
   res_quantiseq$cell_type <- rownames(res_quantiseq)
 
@@ -189,20 +176,32 @@
   res_quantiseq_Temp <- left_join(Survival.df,res_quantiseq_Temp)
   res_quantiseq_Temp <- res_quantiseq_Temp[!is.na(res_quantiseq_Temp[,ncol(res_quantiseq_Temp)]),]
 
-  # res_quantiseq_Temp <- res_quantiseq_Temp[!is.na(res_quantiseq_Temp[,"OS"]),]
+
+  res_quantiseq_Temp <- res_quantiseq_Temp[,-5:-11]
+  colnames(res_quantiseq_Temp) <- gsub("\\.", "", colnames(res_quantiseq_Temp))
+  colnames(res_quantiseq_Temp) <- gsub(" ", "", colnames(res_quantiseq_Temp))
+
+
+  ## as.numeric
+  # res_quantiseq_Temp <- data.frame(apply(res_quantiseq_Temp, 2, function(x) as.numeric(as.character(x))))
+  for (i in 5:ncol(res_quantiseq_Temp)) {
+    res_quantiseq_Temp[,i] <- as.numeric(res_quantiseq_Temp[,i])
+  }
+  rm(i)
+
+  ## How to round a data.frame in R that contains some character variables?
+  ## Ref: https://stackoverflow.com/questions/9063889/how-to-round-a-data-frame-in-r-that-contains-some-character-variables
+  res_quantiseq_Temp <- data.frame(lapply(res_quantiseq_Temp, function(y) if(is.numeric(y)) round(y, 5) else y))
+
 
   ## timesseq setting
-  timesseq.set <- seq(from=1, to=10, by=2)  ## timesseq.set <- c(1,3,5,7,9)
-  timesseq.set <- seq(from=5, to=floor(max(res_quantiseq_Temp$OS.time)/365), by=2)
-
-  # colnames(res_quantiseq_Temp) <- gsub(" ", "", colnames(res_quantiseq_Temp))
-  # Cell_type.set <- gsub(" ", "", Cell_type.set)
-  # res_quantiseq_Temp <- data.frame(apply(res_quantiseq_Temp, 2, function(x) as.numeric(as.character(x))))
-
+  maxandnext=function(x){list(max(x),max(x[-which.max(x)]))} ## Ref: https://bbs.pinggu.org/forum.php?mod=viewthread&action=printable&tid=1419015
+  maxandnext.set <- maxandnext(res_quantiseq_Temp$OStime)
+  timesseq.set <- seq(from=1, to=floor(as.numeric(maxandnext.set[2])/365), by=2) ## timesseq.set <- c(1,3,5,7,9)
 
   ROCResultSeq <- TimeDepROC(res_quantiseq_Temp,timesseq.set,
-                             Tar = as.character(Cell_type.set[3]),
-                             time = "OS.time", censor="OS",
+                             Tar = "Ductalcelltype2", #as.character(Cell_type.set[3])
+                             time = "OStime", censor="OS",
                              save.path = Save.Path , Filename="PAAD")
 
 
