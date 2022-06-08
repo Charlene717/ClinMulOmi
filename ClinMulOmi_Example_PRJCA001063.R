@@ -32,6 +32,11 @@
 
   options(stringsAsFactors = FALSE)
 
+##### Function setting #####
+  ## Call function
+  source("FUN_TimeDepROC.R")
+  source("FUN_DFCutoffSet.R")
+
 ##### Current path and new folder setting*  #####
   ProjectName = "TOP2A" # Secret, ECM, CC
   Version = paste0(Sys.Date(),"_",ProjectName,"_PADC")
@@ -49,6 +54,10 @@
   BulkGE.df <- read.delim(file = "TCGA_PAAD_HiSeqV2")
   row.names(BulkGE.df) <- BulkGE.df[,1]
   BulkGE.df <- BulkGE.df[,-1]
+
+## Load survival data
+  Survival.df <- read.delim(file = "survival_PAAD_survival.txt")
+
 
 
 ##### Generation of signature matrices from single cell data #####
@@ -107,6 +116,7 @@
   colnames(FibCTMarker2)[2] <- Cell_type.set[1] %>% as.character()
   ## Test
 
+  ## About 1 hour
   for (i in 1:length(Cell_type.set)) {
     if(i==1){
       CTMarker.df <- FindMarkers(scRNA.SeuObj, ident.1= Cell_type.set[i],only.pos = TRUE,
@@ -115,15 +125,15 @@
                      select(Gene,avg_log2FC)
       colnames(CTMarker.df)[2] <- Cell_type.set[i] %>% as.character()
 
-    }
+    }else{
       CTMarker_Temp <- FindMarkers(scRNA.SeuObj, ident.1= Cell_type.set[i],only.pos = TRUE,
-                              min.pct = 0.25, logfc.threshold = 0.25) %>%
-                       rownames_to_column(var="Gene") %>%
-                       select(Gene,avg_log2FC)
+                                   min.pct = 0.25, logfc.threshold = 0.25) %>%
+        rownames_to_column(var="Gene") %>%
+        select(Gene,avg_log2FC)
       colnames(CTMarker_Temp)[2] <- Cell_type.set[i] %>% as.character()
 
       CTMarker.df <- full_join(CTMarker.df,CTMarker_Temp, by = "Gene")
-
+    }
   }
   rm(i,CTMarker_Temp)
   CTMarker.df_Ori <-CTMarker.df
@@ -167,6 +177,33 @@
 
 #************************************************************************************************************************#
   ##### TimeDepROC #####
+  ## Data prepocessing
+  res_quantiseq_Temp <- res_quantiseq %>% t() %>% as.data.frame() %>%
+                        rownames_to_column(var="sample")
+  res_quantiseq_Temp$sample <- gsub("\\.", "-", res_quantiseq_Temp$sample)
+
+  ## Keep primary tumor only (01: Primary Solid Tumor) ## Ref: https://gdc.cancer.gov/resources-tcga-users/tcga-code-tables/sample-type-codes
+  res_quantiseq_Temp <- res_quantiseq_Temp[grepl("01$", res_quantiseq_Temp$sample),]
+
+
+  res_quantiseq_Temp <- left_join(Survival.df,res_quantiseq_Temp)
+  res_quantiseq_Temp <- res_quantiseq_Temp[!is.na(res_quantiseq_Temp[,ncol(res_quantiseq_Temp)]),]
+
+  # res_quantiseq_Temp <- res_quantiseq_Temp[!is.na(res_quantiseq_Temp[,"OS"]),]
+
+  ## timesseq setting
+  timesseq.set <- seq(from=1, to=10, by=2)  ## timesseq.set <- c(1,3,5,7,9)
+  timesseq.set <- seq(from=5, to=floor(max(res_quantiseq_Temp$OS.time)/365), by=2)
+
+  # colnames(res_quantiseq_Temp) <- gsub(" ", "", colnames(res_quantiseq_Temp))
+  # Cell_type.set <- gsub(" ", "", Cell_type.set)
+  # res_quantiseq_Temp <- data.frame(apply(res_quantiseq_Temp, 2, function(x) as.numeric(as.character(x))))
+
+
+  ROCResultSeq <- TimeDepROC(res_quantiseq_Temp,timesseq.set,
+                             Tar = as.character(Cell_type.set[3]),
+                             time = "OS.time", censor="OS",
+                             save.path = Save.Path , Filename="PAAD")
 
 
 
