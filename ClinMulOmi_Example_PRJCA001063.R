@@ -101,20 +101,7 @@
 
 
   Cell_type.set <- scRNA.SeuObj@meta.data[["Cell_type"]] %>% unique()
-
   Idents(scRNA.SeuObj) <- scRNA.SeuObj$Cell_type
-
-  ## Test
-  FibCTMarker <- FindMarkers(scRNA.SeuObj, ident.1= Cell_type.set[1],only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
-
-  CellType.name <- as.character(Cell_type.set[1])
-  FibCTMarker2 <- FibCTMarker %>%
-                  rownames_to_column(var="Gene") %>%
-                  select(Gene,avg_log2FC) %>%
-                  rename(CellType.name=avg_log2FC)
-
-  colnames(FibCTMarker2)[2] <- Cell_type.set[1] %>% as.character()
-  ## Test
 
   ## About 1 hour
   for (i in 1:length(Cell_type.set)) {
