@@ -121,7 +121,7 @@ TimeDepROC <- function(mayo,timesseq.set,Tar="mayoscore5",time = "time", censor=
                                        size=17, angle=0),
             axis.text.y = element_text(face="bold", color="black",
                                        size=17, angle=0)) +  # Change the appearance and the orientation angle
-      ggtitle("ROC Curve")+ # Change the main title and axis labels
+      ggtitle(paste0("ROC Curve (",gsub("\\.", " ",Tar),")"))+ # Change the main title and axis labels
 
       theme(
         plot.title = element_text(color="black", size=20, face="bold", hjust = 0.5),
