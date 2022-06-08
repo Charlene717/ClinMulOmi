@@ -420,5 +420,67 @@
 
 
 #######################################################################################
-
-
+# #### CNV ####
+#   ##### Heatmap plotting #####
+#   ## Set column annotation
+#   column_ha_T = HeatmapAnnotation(
+#     Condition = anno_colum.df$Body.weight,
+#     Condition2 = anno_colum.df$Area,
+#     col = list(Condition = c("Mild"="#9b6ab8", "Severe"="#6e6970"),
+#                Condition2= c("Mild"="#9b6ab8", "Severe"="#6e6970","Medium"="#b57545")),
+#     show_legend = T
+#   )
+#
+#   ## generate color of top annotation
+#   col_exp <-  colorRamp2(
+#     c(0, 0.025, 0.05),
+#     c("#248a5c", "#52bf8e","#bbedd7")
+#   )
+#   col_exp2 <-  colorRamp2(
+#     c(-17, 0, 17),
+#     c("#1a5691", "#96cbff", "#d1e8ff")
+#   )
+#
+#   row_ha = rowAnnotation(
+#     p.value = anno_row.df$p.value.Severe.vs..Mild.,
+#     LogFC = anno_row.df$Difference.Severe.vs..Mild.,
+#     col = list(p.value = col_exp, LogFC = col_exp2),
+#     show_legend = T
+#   )
+#
+#
+#   Heatmap(
+#     matrix.df[-1],
+#     # column_title = target_gene,
+#     # column_title_side = "top",
+#     cluster_rows = T,
+#     cluster_columns = T,
+#     show_column_names = F,
+#     show_row_names = F,
+#     name = "M-Value",
+#     # set color
+#     col = colorRamp2(
+#       c(0, 0.5, 1),
+#       c("#1c77d9", "#1a2938", "#ffe182")
+#     ),
+#     show_heatmap_legend = T,
+#     use_raster = F,
+#     top_annotation = column_ha_T,
+#     right_annotation = row_ha
+#   ) -> P.Heatmap
+#
+#   P.Heatmap %>% print
+#
+#
+#   ##### Export PDF #####
+#
+#   pdf(
+#     file = paste0(getwd(), "/",Version,"/", Sys.Date(), "_MValue_Heatmap.pdf"),
+#     width = 7, height = 7
+#   )
+#   P.Heatmap
+#
+#   graphics.off()
+#
+#
+#   ## From: D:\Dropbox\##_GitHub\##_PHH_Lab\Heatmap_Cachexia_DNAMeth
