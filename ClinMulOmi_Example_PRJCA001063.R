@@ -164,7 +164,8 @@
                     geom_bar(stat='identity') +
                     coord_flip() +
                     scale_fill_brewer(palette="Paired") +
-                    scale_x_discrete(limits = rev(levels(res_quantiseq)))
+                    scale_x_discrete(limits = rev(levels(res_quantiseq))) -> p.Decon1
+  p.Decon1
 
   res_quantiseq %>% gather(sample, score, -cell_type) %>%
                     ggplot(aes(x=sample, y=score, color=cell_type)) +
@@ -173,9 +174,15 @@
                     scale_color_brewer(palette="Paired", guide=FALSE) +
                     coord_flip() +
                     theme_bw() +
-                    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+                    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) -> p.Decon2
+  p.Decon2
 
-
+  pdf(file = paste0(Save.Path,"/Decon_",Filename,".pdf"),
+      width = 10,  height = 10
+  )
+    p.Decon1
+    p.Decon2
+  dev.off()
 #************************************************************************************************************************#
   ##### TimeDepROC #####
   ## Data prepocessing
@@ -401,9 +408,17 @@
   #                    data = res_quantiseq_Temp)
   ggforest(fit.coxph, data = res_quantiseq_Temp,
            noDigits = 3)
-
+  pdf(file = paste0(Save.Path,"/",ProjectName,"_HR.pdf"),
+      width = 8,  height = 7
+  )
+  ggforest(fit.coxph, data = res_quantiseq_Temp,
+           noDigits = 3)
+  dev.off()
 
   #### Save RData ####
   save.image("ClinMulOmi_Example_PRJCA001063.RData")
+
+
+#######################################################################################
 
 
