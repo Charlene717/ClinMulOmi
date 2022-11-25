@@ -5,32 +5,15 @@
   rm(list = ls()) # Clean variable
   memory.limit(150000)
 
-#### Load the required libraries ####
-  ## Check whether the installation of those packages is required from basic
-  Package.set <- c("tidyverse","timeROC","Seurat","survival","survminer","survivalROC","colorspace")
-  for (i in 1:length(Package.set)) {
-    if (!requireNamespace(Package.set[i], quietly = TRUE)){
-      install.packages(Package.set[i])
-    }
-  }
-  ## Load Packages
-  lapply(Package.set, library, character.only = TRUE)
-  rm(Package.set,i)
+##### Load Packages #####
+  #### Basic and BiocManager installation ####
+  source("FUN_Package_InstLoad.R")
+  FUN_Basic.set <-c("tidyverse","timeROC","Seurat","survival","survminer","survivalROC","colorspace")
+  FUN_BiocManager.set <- c("basilisk","zellkonverter","SeuratDisk")
 
-  ## Check whether the installation of those packages is required from BiocManager
-  if (!require("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
-  Package.set <- c("basilisk","zellkonverter","SeuratDisk")
-  for (i in 1:length(Package.set)) {
-    if (!requireNamespace(Package.set[i], quietly = TRUE)){
-      BiocManager::install(Package.set[i])
-    }
-  }
-  ## Load Packages
-  lapply(Package.set, library, character.only = TRUE)
-  rm(Package.set,i)
+  FUN_Package_InstLoad(Basic.set = FUN_Basic.set, BiocManager.set = FUN_BiocManager.set)
+  rm(FUN_Basic.set, FUN_BiocManager.set)
 
-  options(stringsAsFactors = FALSE)
 
 ##### Function setting #####
   ## Call function
@@ -38,7 +21,7 @@
   source("FUN_DFCutoffSet.R")
 
 ##### Current path and new folder setting*  #####
-  ProjectName = "TOP2A" # Secret, ECM, CC
+  ProjectName = "ClinMulOmi"
   Filename = "PADC"
   Version = paste0(Sys.Date(),"_",ProjectName,"_PADC")
   Save.Path = paste0(getwd(),"/",Version)
@@ -49,7 +32,10 @@
 
 ##### Load Data #####
 ## Load Seurat RData
-  load("PRJCA001063_seuratObject.RData")
+  # load("PRJCA001063_seuratObject.RData")
+  load("D:/Dropbox/#_Dataset/Cancer/PDAC/2022-11-24_scRNA_SeuObj_PDAC_ROGUE.RData")
+
+  scRNA.SeuObj$Cell_type <- scRNA.SeuObj$singleR_classic_PredbyscRNA2
 
 ## Load Bulk RData
   BulkGE.df <- read.delim(file = "TCGA_PAAD_HiSeqV2")
@@ -416,8 +402,8 @@
   dev.off()
 
   #### Save RData ####
-  save.image("ClinMulOmi_Example_PRJCA001063.RData")
-
+  # save.image("ClinMulOmi_Example_PRJCA001063.RData")
+  save.image(paste0("D:/Dropbox/#_Dataset/Cancer/PDAC/",Version,"_ClinMulOmi.RData"))
 
 #######################################################################################
 # #### CNV ####
