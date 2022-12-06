@@ -24,7 +24,7 @@
 ##### Load Data #####
 ## Load Seurat RData
   # load("PRJCA001063_seuratObject.RData")
-  load("D:/Dropbox/#_Dataset/Cancer/PDAC/2022-12-24_scRNA_SeuObj_PDAC_ROGUE.RData")
+  load("D:/Dropbox/#_Dataset/Cancer/PDAC/2022-11-24_scRNA_SeuObj_PDAC_ROGUE.RData")
 
   ## Cell type setting
   scRNA.SeuObj$Cell_type <- scRNA.SeuObj$singleR_classic_PredbyscRNA
