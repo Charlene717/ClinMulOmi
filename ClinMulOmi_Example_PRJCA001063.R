@@ -20,22 +20,17 @@
   source("FUN_TimeDepROC.R")
   source("FUN_DFCutoffSet.R")
 
-##### Current path and new folder setting*  #####
-  ProjectName = "ClinMulOmi"
-  Filename = "PADC"
-  Version = paste0(Sys.Date(),"_",ProjectName,"_PADC")
-  Save.Path = paste0(getwd(),"/",Version)
-  ## Create new folder
-  if (!dir.exists(Save.Path)){
-    dir.create(Save.Path)
-  }
 
 ##### Load Data #####
 ## Load Seurat RData
   # load("PRJCA001063_seuratObject.RData")
-  load("D:/Dropbox/#_Dataset/Cancer/PDAC/2022-11-24_scRNA_SeuObj_PDAC_ROGUE.RData")
+  load("D:/Dropbox/#_Dataset/Cancer/PDAC/2022-12-24_scRNA_SeuObj_PDAC_ROGUE.RData")
 
+  ## Cell type setting
+  scRNA.SeuObj$Cell_type <- scRNA.SeuObj$singleR_classic_PredbyscRNA
   scRNA.SeuObj$Cell_type <- scRNA.SeuObj$singleR_classic_PredbyscRNA2
+
+
 
 ## Load Bulk RData
   BulkGE.df <- read.delim(file = "TCGA_PAAD_HiSeqV2")
@@ -46,35 +41,42 @@
   Survival.df <- read.delim(file = "survival_PAAD_survival.txt")
 
 
+##### Current path and new folder setting*  #####
+  ProjectName = "ClinMulOmi"
+  Filename = "PADC"
+  Version = paste0(Sys.Date(),"_",ProjectName,"_PADC")
+  Save.Path = paste0(getwd(),"/",Version)
+  ## Create new folder
+  if (!dir.exists(Save.Path)){
+    dir.create(Save.Path)
+  }
+
 
 ##### Generation of signature matrices from single cell data #####
-  ##### Prepossessing  #####
-  seed=1
-  set.seed(seed) # Fix the seed
-  scRNA.SeuObj <- ScaleData(scRNA.SeuObj, verbose = FALSE)
-  # AnnoNames.set <- colnames(scRNA.SeuObj@meta.data)
-
-  set.seed(seed) # Fix the seed
-  scRNA.SeuObj <- FindVariableFeatures(object = scRNA.SeuObj)
-
-  set.seed(seed) # Fix the seed
-  scRNA.SeuObj <- RunPCA(scRNA.SeuObj, features = VariableFeatures(object = scRNA.SeuObj))
-
-  PCAdims <- 30
-  set.seed(seed) # Fix the seed
-  scRNA.SeuObj <- RunUMAP(scRNA.SeuObj, reduction = "pca", dims = 1:PCAdims)
-
-  set.seed(seed) # Fix the seed
-  scRNA.SeuObj <- FindNeighbors(scRNA.SeuObj, reduction = "pca", dims = 1:PCAdims)
-  set.seed(seed) # Fix the seed
-  scRNA.SeuObj <- FindClusters(scRNA.SeuObj, resolution = 0.5)
+  # ##### Prepossessing  #####
+  # seed=1
+  # set.seed(seed) # Fix the seed
+  # scRNA.SeuObj <- ScaleData(scRNA.SeuObj, verbose = FALSE)
+  # # AnnoNames.set <- colnames(scRNA.SeuObj@meta.data)
+  #
+  # set.seed(seed) # Fix the seed
+  # scRNA.SeuObj <- FindVariableFeatures(object = scRNA.SeuObj)
+  #
+  # set.seed(seed) # Fix the seed
+  # scRNA.SeuObj <- RunPCA(scRNA.SeuObj, features = VariableFeatures(object = scRNA.SeuObj))
+  #
+  # PCAdims <- 30
+  # set.seed(seed) # Fix the seed
+  # scRNA.SeuObj <- RunUMAP(scRNA.SeuObj, reduction = "pca", dims = 1:PCAdims)
+  #
+  # set.seed(seed) # Fix the seed
+  # scRNA.SeuObj <- FindNeighbors(scRNA.SeuObj, reduction = "pca", dims = 1:PCAdims)
+  # set.seed(seed) # Fix the seed
+  # scRNA.SeuObj <- FindClusters(scRNA.SeuObj, resolution = 0.5)
 
   #### Plot UMAP ###
   DimPlot(scRNA.SeuObj, reduction = "umap")
-
-  scRNA.SeuObj2 <- scRNA.SeuObj
-
-  DimPlot(scRNA.SeuObj2, reduction = "umap",group.by ="Cell_type", label = TRUE, pt.size = 0.5) + NoLegend()
+  DimPlot(scRNA.SeuObj, reduction = "umap",group.by ="Cell_type", label = TRUE, pt.size = 0.5) + NoLegend()
 
 
   #### Find Markers ###
@@ -384,7 +386,7 @@
   # Fit a Cox proportional hazards model
   surv_object <- Surv(time = res_quantiseq_Temp$OStime, event = res_quantiseq_Temp$OS)
   fit.coxph <- coxph(surv_object ~  Stellate.cell + Macrophage.cell + Endothelial.cell + T.cell + B.cell+
-                                    Endocrine.cell + Fibroblast.celly + Macrophage.cell +
+                                    Endocrine.cell + Fibroblast.cell + Macrophage.cell +
                                     Ductal.cell.type.2 + Endocrine.cell + Ductal.cell.type.1 + Acinar.cell,
                      data = res_quantiseq_Temp)
 
